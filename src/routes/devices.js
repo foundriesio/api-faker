@@ -28,7 +28,7 @@ const BASE_TARGETS = [
   'raspberrypi4-64-lmp-',
 ];
 
-const BASE_DEVICE_NAMES = ['cowbody-', 'og-'];
+const BASE_DEVICE_NAMES = ['cowboy-', 'og-'];
 
 function generateTargetName() {
   return `${faker.random.arrayElement(BASE_TARGETS)}${faker.random.number({
