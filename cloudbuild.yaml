@@ -26,3 +26,17 @@ steps:
       'push',
       'us.gcr.io/$PROJECT_ID/heracles/faker:$SHORT_SHA'
     ]
+  - name: 'gcr.io/cloud-builders/kubectl'
+    env: [
+      'CLOUDSDK_CONTAINER_CLUSTER=$PROJECT_ID',
+      'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
+    ]
+    args: [
+      '-n',
+      'heracles',
+      'set',
+      'image',
+      'deploy/api-faker',
+      'faker=us.gcr.io/$PROJECT_ID/heracles/faker:$SHORT_SHA',
+      '--record'
+    ]
