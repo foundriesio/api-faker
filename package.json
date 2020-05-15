@@ -1,0 +1,42 @@
+{
+  "name": "api-faker",
+  "version": "1.0.0",
+  "main": "dist/main.js",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "lint": "prettier *.md *.js ./src/*.js ./src/**/*.js ./src/**/**/*.js --write",
+    "build": "NODE_ENV=production webpack --progress",
+    "start:dev": "NODE_ENV=development webpack-dev-server",
+    "start": "NODE_ENV=production node dist/main.js"
+  },
+  "author": "Milo Casagrande <milo@foundries.io>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@foundriesio/log": "^1.0.4",
+    "compress": "^0.99.0",
+    "convict": "^6.0.0",
+    "convict-format-with-validator": "^6.0.0",
+    "cuid": "^2.1.8",
+    "express": "^4.17.1",
+    "faker": "^4.1.0",
+    "jws": "^4.0.0",
+    "nanoid": "^3.1.7",
+    "source-map-support": "^0.5.19",
+    "v8-compile-cache": "^2.1.0"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^3.0.0",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-security": "^1.4.0",
+    "pino-pretty": "^4.0.0",
+    "prettier": "^2.0.5",
+    "rimraf": "^3.0.2",
+    "spawn-server-webpack-plugin": "^4.0.0",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.11.0"
+  }
+}

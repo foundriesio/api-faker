@@ -1,0 +1,6 @@
+.editorconfig
+.env
+.eslintrc.json
+.git
+*.md
+node_modules
