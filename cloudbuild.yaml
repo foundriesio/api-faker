@@ -1,0 +1,28 @@
+steps:
+  - name: 'node:lts-alpine'
+    entrypoint: 'npm'
+    args: ['ci']
+  - name: 'node:lts-alpine'
+    entrypoint: 'npm'
+    args: ['run' , 'build']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-t',
+      'us.gcr.io/$PROJECT_ID/heracles/faker:latest',
+      '-t',
+      'us.gcr.io/$PROJECT_ID/heracles/faker:$SHORT_SHA',
+      '-f',
+      'Dockerfile-cloudbuild',
+      '/workspace'
+    ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push',
+      'us.gcr.io/$PROJECT_ID/heracles/faker:latest'
+    ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push',
+      'us.gcr.io/$PROJECT_ID/heracles/faker:$SHORT_SHA'
+    ]
