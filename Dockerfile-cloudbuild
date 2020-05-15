@@ -28,7 +28,7 @@ ENV WORKSPACE=/home/node
 WORKDIR $WORKSPACE
 
 COPY --chown=node:node $PWD/dist/ $WORKSPACE/dist/
-COPY --from=0 --chown=node:node $PWD/node_modules/ $WORKSPACE/node_modules/
+COPY --from=0 --chown=node:node /home/node/node_modules/ $WORKSPACE/node_modules/
 
 EXPOSE 3040
 
