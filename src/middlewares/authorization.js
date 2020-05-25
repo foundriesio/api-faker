@@ -12,13 +12,13 @@ export function decodeJwtSignature(req, res, next) {
   const authorizationHeader = req.headers['authorization'];
 
   if (!authorizationHeader) {
-    return;
+    return next();
   }
 
   const [authType, authValue] = authorizationHeader.split(' ');
 
   if (authType.toLowerCase() !== 'jwt-bearer') {
-    return;
+    return next();
   }
 
   try {
