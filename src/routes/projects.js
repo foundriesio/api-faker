@@ -150,9 +150,7 @@ router.get('/:project/builds/:build/', (req, res) => {
 router.get('/:project/builds/:build/project.yml', (req, res) => {
   const bid = req.params.build;
   const project = req.params.project;
-  res
-    .type('text/yaml')
-    .send(`\
+  res.type('text/yaml').send(`\
 scripts:
   flake8: '#!/bin/sh -ex
 
