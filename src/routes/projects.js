@@ -107,7 +107,7 @@ const generateBuildItem = ({ isDetailed, url, bid }) => {
 };
 
 const generateBuildList = (url) => {
-  const limit = faker.random.number({ min: 30, max: 120 });
+  const limit = faker.random.number({ min: 0, max: 60 });
   const arr = new Array(limit);
   const buildUrl = `${url}/builds`;
   for (let idx = 0; idx < limit; idx++) {
