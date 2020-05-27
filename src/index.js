@@ -45,7 +45,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/builds', BuildsRoutes);
+app.use('/projects/jobserv/builds', BuildsRoutes);
 app.use('/healthz', HealthRoutes);
 app.use('/factories', FactoriesRoutes);
 app.use('/devices', DevicesRoutes);

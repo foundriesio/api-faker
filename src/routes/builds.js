@@ -13,16 +13,6 @@ import appState from '../lib/state';
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  if (appState.isGood() && !appState.isShuttingDown()) {
-    res.json({ status: 'ok' });
-    return;
-  }
-
-  res.status(503).json({ status: 'ko' });
-});
-
-
-router.get('/builds/', (req, res) => {
     res.status(200).json({
         status: 'success',
         data: {
@@ -162,7 +152,7 @@ router.get('/builds/', (req, res) => {
     });
     return;
 });
-router.get('/builds/:build/', (req, res) => {
+router.get('/:build/', (req, res) => {
     let status = {
         '1': 'FAILED',
         '2': 'QUEUED',
@@ -247,11 +237,11 @@ router.get('/builds/:build/', (req, res) => {
     });
     return;
 });
-router.get('/builds/:build/project.yml', (req, res) => {
+router.get('/:build/project.yml', (req, res) => {
     res.status(200).type('text/yaml').send('some: yaml');
     return;
 });
-router.get('/builds/latest/', (req, res) => {
+router.get('/latest', (req, res) => {
     res.status(200).json({
         status: 'success',
         data: {
