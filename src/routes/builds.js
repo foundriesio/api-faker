@@ -13,7 +13,7 @@ import appState from '../lib/state';
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.status(200).json({
+    res.json({
         status: 'success',
         data: {
             builds: [
@@ -162,7 +162,7 @@ router.get('/:build/', (req, res) => {
         '6': 'RUNNING',
         '7': 'RUNNING',
     }[req.param.build];
-    res.status(200).json({
+    res.json({
         status: 'success',
         data: {
             build: {
@@ -238,11 +238,11 @@ router.get('/:build/', (req, res) => {
     return;
 });
 router.get('/:build/project.yml', (req, res) => {
-    res.status(200).type('text/yaml').send('some: yaml');
+    res.type('text/yaml').send('some: yaml');
     return;
 });
 router.get('/latest', (req, res) => {
-    res.status(200).json({
+    res.json({
         status: 'success',
         data: {
             build: {
