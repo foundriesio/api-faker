@@ -129,23 +129,23 @@ const generateBuildList = (url) => {
 }
 
 const router = express.Router();
-router.get('/', (req, res) => {
-    const name = faker.random.word();
-    const url = `https://example.net/projects/${name}`;
+router.get('/:project/builds/', (req, res) => {
+    const project = req.params.project;
+    const url = `https://example.net/projects/${project}`;
     const builds = generateBuildList(url);
     res.json({
         status: 'success',
         data: {
             builds: builds,
             total: builds.length,
-            next: `${url}/${name}/builds/?page=1&limit=10`,
+            next: `${url}/builds/?page=1&limit=10`,
         }
     });
     return;
 });
-router.get('/:build/', (req, res) => {
-    const name = faker.random.word();
-    const url = `https://example.net/projects/${name}`;
+router.get('/:project/builds/:build/', (req, res) => {
+    const project = req.params.project;
+    const url = `https://example.net/projects/${project}`;
     res.json({
         status: 'success',
         data: {
@@ -158,14 +158,16 @@ router.get('/:build/', (req, res) => {
     });
     return;
 });
-router.get('/:build/project.yml', (req, res) => {
+router.get('/:project/builds/:build/project.yml', (req, res) => {
     const bid = req.params.build;
-    res.type('text/yaml').send(`some: yaml for build ${bid}`);
+    const project = req.params.project;
+    res.type('text/yaml').send(
+        `some: "yaml for project ${project} build ${bid}"`);
     return;
 });
-router.get('/latest', (req, res) => {
-    const name = faker.random.word();
-    const url = `https://example.net/projects/${name}`;
+router.get('/:project/builds/latest', (req, res) => {
+    const project = req.params.project;
+    const url = `https://example.net/projects/${project}`;
     const bid = faker.random.number();
     res.json({
         status: 'success',
