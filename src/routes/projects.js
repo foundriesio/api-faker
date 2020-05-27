@@ -9,8 +9,6 @@ You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2
 import express from 'express';
 import faker from 'faker';
 
-import appState from '../lib/state';
-
 const BUILD_STATUS_CHOICES = [
   'FAILED',
   'QUEUED',
@@ -22,6 +20,7 @@ const BUILD_STATUS_CHOICES = [
 ];
 const RUN_STATUS_CHOICES = [...BUILD_STATUS_CHOICES, 'CANCELLING'];
 const HOST_CHOICES = ['arm32', 'arm64', 'amd64'];
+const ROOT_URL = 'https://example.net/projects';
 
 const randomAnnotation = () => {
   const name = faker.random.word();
@@ -51,28 +50,29 @@ const randomDate = () =>
 
 const randomDatePassed = () => faker.date.past(1);
 
-const generateOptionallRunFields = (buildId, runName) => {
+const generateOptionallRunFields = (url) => {
   const fields = {};
   if (faker.random.boolean()) {
     fields.created = randomDatePassed();
     fields.completed = randomDate();
     fields.host_tag = randomHostTag();
-    fields.tests = `https://example.net/${buildId}/${runName}`;
+    fields.tests = `${url}/tests/`;
   }
   return fields;
 };
 
-const generateRuns = (bid, url) => {
+const generateRuns = (url) => {
   const limit = faker.random.number({ min: 2, max: 6 });
   const arr = new Array(limit);
   for (let idx = 0; idx < limit; idx++) {
     const name = faker.random.word();
+    const runUrl = `${url}/runs/${name}`;
     arr[idx] = {
       name,
-      url: `${url}/${bid}/${name}`,
+      url: runUrl,
       status: randomRunStatus(),
-      log_url: `${url}/${bid}/${name}`,
-      ...generateOptionallRunFields(bid, name),
+      log_url: `${runUrl}/console.log`,
+      ...generateOptionallRunFields(runUrl),
     };
   }
   return arr;
@@ -107,26 +107,27 @@ const generateAnnotation = (status) => {
   return status === 'PROMOTED' ? randomAnnotation() : null;
 };
 
-const generateDetailBuildFields = ({ bid, url, statusEvents, status }) => {
+const generateDetailBuildFields = ({ url, statusEvents, status }) => {
   return {
     status_events: statusEvents,
-    runs_url: `${url}/${bid}/runs`,
+    runs_url: `${url}/runs`,
     reason: `GitHub PR(${faker.random.number()}): pull_request`,
     annotation: generateAnnotation(status),
   };
 };
 
 const generateBuildItem = ({ isDetailed, url, bid }) => {
+  const itemUrl = `${url}/${bid}`;
   const status = randomBuildStatus();
   const statusEvents = generateStatusEvents();
   const detailedFields = isDetailed
-    ? generateDetailBuildFields({ bid, url, statusEvents, status })
+    ? generateDetailBuildFields({ url: itemUrl, statusEvents, status })
     : {};
   return {
     build_id: bid,
-    url: `${url}/${bid}`,
+    url: itemUrl,
     status,
-    runs: generateRuns(bid, url),
+    runs: generateRuns(itemUrl),
     ...generateOptionalBuildFields(statusEvents),
     ...detailedFields,
   };
@@ -135,7 +136,7 @@ const generateBuildItem = ({ isDetailed, url, bid }) => {
 const generateBuildList = (url) => {
   const limit = faker.random.number({ min: 0, max: 60 });
   const arr = new Array(limit);
-  const buildUrl = `${url}/builds`;
+  const buildUrl = `${url}/builds/`;
   for (let idx = 0; idx < limit; idx++) {
     const bid = faker.random.number();
     arr[idx] = generateBuildItem({ url: buildUrl, bid });
@@ -146,7 +147,7 @@ const generateBuildList = (url) => {
 const router = express.Router();
 router.get('/:project/builds/', (req, res) => {
   const project = req.params.project;
-  const url = `https://example.net/projects/${project}`;
+  const url = `${ROOT_URL}/${project}`;
   const builds = generateBuildList(url);
   res.json({
     status: 'success',
@@ -160,7 +161,7 @@ router.get('/:project/builds/', (req, res) => {
 });
 router.get('/:project/builds/:build/', (req, res) => {
   const project = req.params.project;
-  const url = `https://example.net/projects/${project}`;
+  const url = `${ROOT_URL}/${project}`;
   res.json({
     status: 'success',
     data: {
@@ -228,7 +229,7 @@ triggers:
 });
 router.get('/:project/builds/latest', (req, res) => {
   const project = req.params.project;
-  const url = `https://example.net/projects/${project}`;
+  const url = `${ROOT_URL}/${project}`;
   const bid = faker.random.number();
   res.json({
     status: 'success',
