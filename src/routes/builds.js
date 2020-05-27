@@ -7,11 +7,21 @@ You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2
 */
 
 import express from 'express';
+import faker from 'faker';
 
 import appState from '../lib/state';
 
+const STATUS_CHOICES = [
+    'FAILED',
+    'QUEUED',
+    'PASSED',
+    'PROMOTED',
+    'RUNNING_WITH_FAILURES',
+    'RUNNING',
+    'RUNNING',
+];
+const random_status = () => faker.random.arrayElement(STATUS_CHOICES);
 const router = express.Router();
-
 router.get('/', (req, res) => {
     res.json({
         status: 'success',
@@ -153,15 +163,6 @@ router.get('/', (req, res) => {
     return;
 });
 router.get('/:build/', (req, res) => {
-    let status = {
-        '1': 'FAILED',
-        '2': 'QUEUED',
-        '3': 'PASSED',
-        '4': 'PROMOTED',
-        '5': 'RUNNING_WITH_FAILURES',
-        '6': 'RUNNING',
-        '7': 'RUNNING',
-    }[req.param.build];
     res.json({
         status: 'success',
         data: {
@@ -169,7 +170,7 @@ router.get('/:build/', (req, res) => {
                 // required
                 build_id: req.param.build,
                 url: 'http://fakebuildid/1',
-                status,
+                status: random_status(),
                 runs: [
                     {
                         name: 'run-foo',
