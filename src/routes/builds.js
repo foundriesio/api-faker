@@ -252,6 +252,55 @@ router.get('/builds/:build/project.yml', (req, res) => {
     return;
 });
 router.get('/builds/latest/', (req, res) => {
+    res.status(200).json({
+        status: 'success',
+        data: {
+            build: {
+                build_id: 7,
+                url: 'http://fakebuildid/1',
+                status: 'RUNNING',
+                runs: [
+                    {
+                        name: 'run-foo',
+                        url: 'http://fakerunurl/7/foo',
+                        status: 'PASSED',
+                        log_url: 'http://fakelogurl/7/foo',
+                    },
+                    {
+                        name: 'run-bar',
+                        url: 'http://fakerunurl/7/bar',
+                        status: 'CANCELLING',
+                        log_url: 'http://fakelogurl/7/bar',
+                    },
+                ],
+                status_events: [
+                    {
+                        time: '2019-10-28T11:01:27+00:00',
+                        status: 'QUEUED',
+                    },
+                    {
+                        time: '2019-10-28T11:01:30+01:00',
+                        status: 'RUNNING',
+                    },
+                    {
+                        time: '2019-10-28T11:01:30+24:00',
+                        status: 'PASSED',
+                    },
+                    {
+                        time: '2019-10-28T11:01:30+34:00',
+                        status: 'RUNNING',
+                    },
+                    {
+                        time: '2019-10-28T11:01:30+54:00',
+                        status: 'CANCELLING',
+                    },
+                ],
+                runs_url: `http://fakerunsurl/7`,
+                reason: 'GitHub PR(77): pull_request',
+                annotation: null,
+            }
+        }
+    });
     return;
 });
 
