@@ -11,7 +11,7 @@ import faker from 'faker';
 
 import appState from '../lib/state';
 
-const STATUS_CHOICES = [
+const BUILD_STATUS_CHOICES = [
     'FAILED',
     'QUEUED',
     'PASSED',
@@ -20,276 +20,161 @@ const STATUS_CHOICES = [
     'RUNNING',
     'RUNNING',
 ];
-const random_status = () => faker.random.arrayElement(STATUS_CHOICES);
+const RUN_STATUS_CHOICES = [
+    ...BUILD_STATUS_CHOICES,
+    'CANCELLING',
+];
+const HOST_CHOICES = [
+    'arm32',
+    'arm64',
+    'amd64',
+];
+const randomBuildStatus = () => faker.random.arrayElement(BUILD_STATUS_CHOICES);
+const randomRunStatus = () => faker.random.arrayElement(RUN_STATUS_CHOICES);
+const randomHostTag = () => faker.random.arrayElement(HOST_CHOICES);
+const randomDate = () => faker.date.recent(
+    faker.random.number({ min: 30, max: 120 })
+);
+const generateOptionallRunFields = (buildId, runName) => {
+    const fields = {};
+    if (faker.random.boolean()) {
+        fields.created = randomDate();
+    }
+    if (faker.random.boolean()) {
+        fields.completed = randomDate();
+    }
+    if (faker.random.boolean()) {
+        fields.host_tag = randomHostTag();
+    }
+    if (faker.random.boolean()) {
+        fields.tests = `https://example.net/${buildId}/${runName}`;
+    }
+    return fields;
+};
+const generateRuns = (bid, url) => {
+    const limit = faker.random.number({ min: 2, max: 6 });
+    const arr = new Array(limit);
+    for (let idx = 0; idx < limit; idx++) {
+        const name = faker.random.word();
+        arr[idx] = {
+            name,
+            url: `${url}/${bid}/${name}`,
+            status: randomRunStatus(),
+            log_url: `${url}/${bid}/${name}`,
+            ...generateOptionallRunFields(bid, name),
+        }
+    }
+    return arr;
+};
+const generateOptionalBuildFields = () => {
+    const fields = {};
+    if (faker.random.boolean()) {
+        fields.name = faker.random.word();
+    }
+    if(faker.random.boolean()) {
+        fields.trigger_name = 'merge-request';
+    }
+    if(faker.random.boolean()) {
+        fields.created = randomDate();
+    }
+    if(faker.random.boolean()) {
+        fields.completed = randomDate();
+    }
+    return fields;
+};
+const generateStatusEvents = () => {
+
+    const limit = faker.random.number({ min: 3, max: 10 });
+    const arr = new Array(limit);
+    for (let idx = 0; idx < limit; idx++) {
+        arr[idx] = {
+            time: randomDate(),
+            status: randomRunStatus(),
+        }
+    }
+    return arr;
+}
+const generateDetailBuildFields = (bid, url) => {
+    return {
+        status_events: generateStatusEvents(),
+        runs_url: `${url}/${bid}/runs`,
+        reason: `GitHub PR(${faker.random.number()}): pull_request`,
+        annotation: null,
+    };
+};
+
+const generateBuildItem = ({isDetailed, url, bid}) => {
+    const detailedFields =  isDetailed 
+        ? generateDetailBuildFields(bid, url)
+        : {};
+    return {
+        build_id: bid,
+        url: `${url}/${bid}`,
+        status: randomBuildStatus(),
+        runs: generateRuns(bid, url),
+        ...generateOptionalBuildFields(),
+        ...detailedFields,
+    };
+}
+
+const generateBuildList = (url) => {
+    const limit = faker.random.number({ min: 30, max: 120 });
+    const arr = new Array(limit);
+    const buildUrl = `${url}/builds`;
+    for (let idx = 0; idx < limit; idx++) {
+        const bid = faker.random.number();
+        arr[idx] = generateBuildItem({url: buildUrl, bid});
+    }
+    return arr;
+}
+
 const router = express.Router();
 router.get('/', (req, res) => {
+    const name = faker.random.word();
+    const url = `https://example.net/projects/${name}`;
+    const builds = generateBuildList(url);
     res.json({
         status: 'success',
         data: {
-            builds: [
-                {
-                    // required
-                    build_id: 1,
-                    url: 'http://fakebuildid/1',
-                    status: 'FAILED',
-                    runs: [
-                        {
-                            // required
-                            name: 'run-foo',
-                            url: 'http://fakerunurl/1/foo',
-                            status: 'FAILED',
-                            log_url: 'http://fakelogurl/1/foo',
-                            // optional
-                            created: '2019-10-28T11:01:27+00:00',
-                            completed: '2019-10-28T11:01:31+00:00',
-                            host_tag: 'amd64',
-                            tests: 'http://faketestsurl/1/foo',
-                        },
-                        {
-                            name: 'run-bar',
-                            url: 'http://fakerunurl/1/bar',
-                            status: 'PASSED',
-                            log_url: 'http://fakelogurl/1/bar',
-                        },
-                        {
-                            name: 'run-bar',
-                            url: 'http://fakerunurl/1/baz',
-                            status: 'CANCELLING',
-                            log_url: 'http://fakelogurl/1/baz',
-                        },
-                    ],
-                    // optional
-                    name: 'build name foo',
-                    trigger_name: 'merge-request',
-                    created: '2018-08-10T11:11:26+00:00',
-                    completed: '2019-10-28T11:01:31+00:00',
-                },
-                {
-                    build_id: 2,
-                    runs: [],
-                    status: "QUEUED",
-                    url: "http://fakerunurl/2/foo"
-                },
-                {
-                    build_id: 3,
-                    url: 'http://fakebuildid/3',
-                    status: 'PASSED',
-                    runs: [
-                        {
-                            name: 'run-foo',
-                            url: 'http://fakerunurl/3/foo',
-                            status: 'PASSED',
-                            log_url: 'http://fakelogurl/3/foo',
-
-                        },
-                    ],
-                },
-                {
-                    build_id: 4,
-                    url: 'http://fakebuildid/4',
-                    status: 'PROMOTED',
-                    runs: [
-                        {
-                            name: 'run-foo',
-                            url: 'http://fakerunurl/4/foo',
-                            status: 'PASSED',
-                            log_url: 'http://fakelogurl/4/foo',
-
-                        },
-                    ],
-                },
-                {
-                    build_id: 5,
-                    url: 'http://fakebuildid/5',
-                    status: 'RUNNING_WITH_FAILURES',
-                    runs: [
-                        {
-                            name: 'run-foo',
-                            url: 'http://fakerunurl/5/foo',
-                            status: 'FAILED',
-                            log_url: 'http://fakelogurl/5/foo',
-                        },
-                        {
-                            name: 'run-bar',
-                            url: 'http://fakerunurl/5/bar',
-                            status: 'RUNNING',
-                            log_url: 'http://fakelogurl/5/bar',
-                        },
-                    ],
-                },
-                {
-                    build_id: 6,
-                    url: 'http://fakebuildid/6',
-                    status: 'RUNNING',
-                    runs: [
-                        {
-                            name: 'run-foo',
-                            url: 'http://fakerunurl/6/foo',
-                            status: 'RUNNING',
-                            log_url: 'http://fakelogurl/6/foo',
-                        },
-                        {
-                            name: 'run-bar',
-                            url: 'http://fakerunurl/6/bar',
-                            status: 'RUNNING',
-                            log_url: 'http://fakelogurl/6/bar',
-                        },
-                    ],
-                },
-                {
-                    build_id: 7,
-                    url: 'http://fakebuildid/7',
-                    status: 'RUNNING',
-                    runs: [
-                        {
-                            name: 'run-foo',
-                            url: 'http://fakerunurl/7/foo',
-                            status: 'RUNNING',
-                            log_url: 'http://fakelogurl/7/foo',
-                        },
-                        {
-                            name: 'run-bar',
-                            url: 'http://fakerunurl/7/bar',
-                            status: 'CANCELLING',
-                            log_url: 'http://fakelogurl/7/bar',
-                        },
-                    ],
-                },
-            ],
-            total: 7,
-            next: 'https://fake/projects/jobserv/builds/?page=1&limit=10',
+            builds: builds,
+            total: builds.length,
+            next: `${url}/${name}/builds/?page=1&limit=10`,
         }
     });
     return;
 });
 router.get('/:build/', (req, res) => {
+    const name = faker.random.word();
+    const url = `https://example.net/projects/${name}`;
     res.json({
         status: 'success',
         data: {
-            build: {
-                // required
-                build_id: req.param.build,
-                url: 'http://fakebuildid/1',
-                status: random_status(),
-                runs: [
-                    {
-                        name: 'run-foo',
-                        url: 'http://fakerunurl/1/foo',
-                        status: 'FAILED',
-                        log_url: 'http://fakelogurl/1/foo',
-                        created: '2019-10-28T11:01:27+00:00',
-                        completed: '2019-10-28T11:01:31+00:00',
-                        host_tag: 'amd64',
-                        tests: 'http://faketestsurl/1/foo',
-                    },
-                    {
-                        name: 'run-bar',
-                        url: 'http://fakerunurl/1/bar',
-                        status: 'PASSED',
-                        log_url: 'http://fakelogurl/1/bar',
-                    },
-                    {
-                        name: 'run-bar',
-                        url: 'http://fakerunurl/1/baz',
-                        status: 'CANCELLING',
-                        log_url: 'http://fakelogurl/1/baz',
-                    },
-                ],
-                status_events: [
-                    {
-                        time: '2019-10-28T11:01:27+00:00',
-                        status: 'QUEUED',
-                    },
-                    {
-                        time: '2019-10-28T11:01:30+00:00',
-                        status: 'RUNNING_WITH_FAILURES',
-                    },
-                    {
-                        time: '2019-10-28T11:01:30+00:00',
-                        status: 'FAILED',
-                    },
-                    {
-                        time: '2019-10-28T11:01:30+01:00',
-                        status: 'RUNNING',
-                    },
-                    {
-                        time: '2019-10-28T11:01:30+24:00',
-                        status: 'PASSED',
-                    },
-                    {
-                        time: '2019-10-28T11:01:30+34:00',
-                        status: 'RUNNING',
-                    },
-                    {
-                        time: '2019-10-28T11:01:30+54:00',
-                        status: 'CANCELLING',
-                    },
-                ],
-                runs_url: `http://fakerunsurl/${req.param.build}`,
-                reason: 'GitHub PR(89): pull_request',
-                annotation: null,
-                // optional
-                name: 'build name foo',
-                trigger_name: 'merge-request',
-                created: '2018-08-10T11:11:26+00:00',
-                completed: '2019-10-28T11:01:31+00:00',
-            }
+            build: generateBuildItem({
+                bid: req.params.build,
+                isDetailed: true,
+                url,
+            }),
         }
     });
     return;
 });
 router.get('/:build/project.yml', (req, res) => {
-    res.type('text/yaml').send('some: yaml');
+    const bid = req.params.build;
+    res.type('text/yaml').send(`some: yaml for build ${bid}`);
     return;
 });
 router.get('/latest', (req, res) => {
+    const name = faker.random.word();
+    const url = `https://example.net/projects/${name}`;
+    const bid = faker.random.number();
     res.json({
         status: 'success',
         data: {
-            build: {
-                build_id: 7,
-                url: 'http://fakebuildid/1',
-                status: 'RUNNING',
-                runs: [
-                    {
-                        name: 'run-foo',
-                        url: 'http://fakerunurl/7/foo',
-                        status: 'PASSED',
-                        log_url: 'http://fakelogurl/7/foo',
-                    },
-                    {
-                        name: 'run-bar',
-                        url: 'http://fakerunurl/7/bar',
-                        status: 'CANCELLING',
-                        log_url: 'http://fakelogurl/7/bar',
-                    },
-                ],
-                status_events: [
-                    {
-                        time: '2019-10-28T11:01:27+00:00',
-                        status: 'QUEUED',
-                    },
-                    {
-                        time: '2019-10-28T11:01:30+01:00',
-                        status: 'RUNNING',
-                    },
-                    {
-                        time: '2019-10-28T11:01:30+24:00',
-                        status: 'PASSED',
-                    },
-                    {
-                        time: '2019-10-28T11:01:30+34:00',
-                        status: 'RUNNING',
-                    },
-                    {
-                        time: '2019-10-28T11:01:30+54:00',
-                        status: 'CANCELLING',
-                    },
-                ],
-                runs_url: 'http://fakerunsurl/7',
-                reason: 'GitHub PR(77): pull_request',
-                annotation: null,
-            }
+            build: generateBuildItem({
+                isDetailed: true,
+                url,
+                bid,
+            }),
         }
     });
     return;
