@@ -22,6 +22,7 @@ const BUILD_STATUS_CHOICES = [
 ];
 const RUN_STATUS_CHOICES = [...BUILD_STATUS_CHOICES, 'CANCELLING'];
 const HOST_CHOICES = ['arm32', 'arm64', 'amd64'];
+
 const randomAnnotation = () => {
   const name = faker.random.word();
   const sha = Array(64)
@@ -40,11 +41,16 @@ const randomAnnotation = () => {
 };
 
 const randomBuildStatus = () => faker.random.arrayElement(BUILD_STATUS_CHOICES);
+
 const randomRunStatus = () => faker.random.arrayElement(RUN_STATUS_CHOICES);
+
 const randomHostTag = () => faker.random.arrayElement(HOST_CHOICES);
+
 const randomDate = () =>
   faker.date.recent(faker.random.number({ min: 30, max: 120 }));
+
 const randomDatePassed = () => faker.date.past(1);
+
 const generateOptionallRunFields = (buildId, runName) => {
   const fields = {};
   if (faker.random.boolean()) {
@@ -55,6 +61,7 @@ const generateOptionallRunFields = (buildId, runName) => {
   }
   return fields;
 };
+
 const generateRuns = (bid, url) => {
   const limit = faker.random.number({ min: 2, max: 6 });
   const arr = new Array(limit);
@@ -70,6 +77,7 @@ const generateRuns = (bid, url) => {
   }
   return arr;
 };
+
 const generateOptionalBuildFields = (statusEvents) => {
   const fields = {};
   if (statusEvents) {
@@ -82,6 +90,7 @@ const generateOptionalBuildFields = (statusEvents) => {
   }
   return fields;
 };
+
 const generateStatusEvents = () => {
   const limit = faker.random.number({ min: 0, max: 10 });
   const arr = new Array(limit);
@@ -93,9 +102,11 @@ const generateStatusEvents = () => {
   }
   return arr;
 };
+
 const generateAnnotation = (status) => {
   return status === 'PROMOTED' ? randomAnnotation() : null;
 };
+
 const generateDetailBuildFields = ({ bid, url, statusEvents, status }) => {
   return {
     status_events: statusEvents,
