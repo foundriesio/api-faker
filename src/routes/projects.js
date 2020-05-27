@@ -31,14 +31,8 @@ const generateOptionallRunFields = (buildId, runName) => {
   const fields = {};
   if (faker.random.boolean()) {
     fields.created = randomDate();
-  }
-  if (faker.random.boolean()) {
     fields.completed = randomDate();
-  }
-  if (faker.random.boolean()) {
     fields.host_tag = randomHostTag();
-  }
-  if (faker.random.boolean()) {
     fields.tests = `https://example.net/${buildId}/${runName}`;
   }
   return fields;
@@ -58,24 +52,20 @@ const generateRuns = (bid, url) => {
   }
   return arr;
 };
-const generateOptionalBuildFields = () => {
+const generateOptionalBuildFields = (statusEvents) => {
   const fields = {};
-  if (faker.random.boolean()) {
-    fields.name = faker.random.word();
-  }
-  if (faker.random.boolean()) {
-    fields.trigger_name = 'merge-request';
-  }
-  if (faker.random.boolean()) {
+  if (statusEvents) {
     fields.created = randomDate();
   }
   if (faker.random.boolean()) {
+    fields.trigger_name = 'merge-request';
     fields.completed = randomDate();
+    fields.name = faker.random.word();
   }
   return fields;
 };
 const generateStatusEvents = () => {
-  const limit = faker.random.number({ min: 3, max: 10 });
+  const limit = faker.random.number({ min: 0, max: 10 });
   const arr = new Array(limit);
   for (let idx = 0; idx < limit; idx++) {
     arr[idx] = {
@@ -85,9 +75,9 @@ const generateStatusEvents = () => {
   }
   return arr;
 };
-const generateDetailBuildFields = (bid, url) => {
+const generateDetailBuildFields = ({bid, url, statusEvents}) => {
   return {
-    status_events: generateStatusEvents(),
+    status_events: statusEvents,
     runs_url: `${url}/${bid}/runs`,
     reason: `GitHub PR(${faker.random.number()}): pull_request`,
     annotation: null,
@@ -95,13 +85,14 @@ const generateDetailBuildFields = (bid, url) => {
 };
 
 const generateBuildItem = ({ isDetailed, url, bid }) => {
-  const detailedFields = isDetailed ? generateDetailBuildFields(bid, url) : {};
+  const statusEvents = generateStatusEvents();
+  const detailedFields = isDetailed ? generateDetailBuildFields({bid, url, statusEvents}) : {};
   return {
     build_id: bid,
     url: `${url}/${bid}`,
     status: randomBuildStatus(),
     runs: generateRuns(bid, url),
-    ...generateOptionalBuildFields(),
+    ...generateOptionalBuildFields(statusEvents),
     ...detailedFields,
   };
 };
