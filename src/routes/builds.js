@@ -51,11 +51,17 @@ router.get('/builds/', (req, res) => {
                             status: 'PASSED',
                             log_url: 'http://fakelogurl/1/bar',
                         },
+                        {
+                            name: 'run-bar',
+                            url: 'http://fakerunurl/1/baz',
+                            status: 'CANCELLING',
+                            log_url: 'http://fakelogurl/1/baz',
+                        },
                     ],
                     // optional
                     name: 'build name foo',
                     trigger_name: 'merge-request',
-                    created: '2019-10-28T11:01:10+00:00',
+                    created: '2018-08-10T11:11:26+00:00',
                     completed: '2019-10-28T11:01:31+00:00',
                 },
                 {
@@ -157,6 +163,88 @@ router.get('/builds/', (req, res) => {
     return;
 });
 router.get('/builds/:build/', (req, res) => {
+    let status = {
+        '1': 'FAILED',
+        '2': 'QUEUED',
+        '3': 'PASSED',
+        '4': 'PROMOTED',
+        '5': 'RUNNING_WITH_FAILURES',
+        '6': 'RUNNING',
+        '7': 'RUNNING',
+    }[req.param.build];
+    res.status(200).json({
+        status: 'success',
+        data: {
+            build: {
+                // required
+                build_id: req.param.build,
+                url: 'http://fakebuildid/1',
+                status,
+                runs: [
+                    {
+                        name: 'run-foo',
+                        url: 'http://fakerunurl/1/foo',
+                        status: 'FAILED',
+                        log_url: 'http://fakelogurl/1/foo',
+                        created: '2019-10-28T11:01:27+00:00',
+                        completed: '2019-10-28T11:01:31+00:00',
+                        host_tag: 'amd64',
+                        tests: 'http://faketestsurl/1/foo',
+                    },
+                    {
+                        name: 'run-bar',
+                        url: 'http://fakerunurl/1/bar',
+                        status: 'PASSED',
+                        log_url: 'http://fakelogurl/1/bar',
+                    },
+                    {
+                        name: 'run-bar',
+                        url: 'http://fakerunurl/1/baz',
+                        status: 'CANCELLING',
+                        log_url: 'http://fakelogurl/1/baz',
+                    },
+                ],
+                status_events: [
+                    {
+                        time: '2019-10-28T11:01:27+00:00',
+                        status: 'QUEUED',
+                    },
+                    {
+                        time: '2019-10-28T11:01:30+00:00',
+                        status: 'RUNNING_WITH_FAILURES',
+                    },
+                    {
+                        time: '2019-10-28T11:01:30+00:00',
+                        status: 'FAILED',
+                    },
+                    {
+                        time: '2019-10-28T11:01:30+01:00',
+                        status: 'RUNNING',
+                    },
+                    {
+                        time: '2019-10-28T11:01:30+24:00',
+                        status: 'PASSED',
+                    },
+                    {
+                        time: '2019-10-28T11:01:30+34:00',
+                        status: 'RUNNING',
+                    },
+                    {
+                        time: '2019-10-28T11:01:30+54:00',
+                        status: 'CANCELLING',
+                    },
+                ],
+                runs_url: `http://fakerunsurl/${req.param.build}`,
+                reason: 'GitHub PR(89): pull_request',
+                annotation: null,
+                // optional
+                name: 'build name foo',
+                trigger_name: 'merge-request',
+                created: '2018-08-10T11:11:26+00:00',
+                completed: '2019-10-28T11:01:31+00:00',
+            }
+        }
+    });
     return;
 });
 router.get('/builds/:buildId/project.yml', (req, res) => {
