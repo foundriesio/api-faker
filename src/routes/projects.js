@@ -23,7 +23,7 @@ const HOST_CHOICES = ['arm32', 'arm64', 'amd64'];
 const ROOT_URL = 'https://example.net/projects';
 
 const randomAnnotation = () => {
-  const name = faker.random.word();
+  const name = randomWord();
   const sha = Array(64)
     .fill(null)
     .map(() => Math.floor(Math.random() * 17).toString(16))
@@ -48,31 +48,35 @@ const randomHostTag = () => faker.random.arrayElement(HOST_CHOICES);
 const randomDate = () =>
   faker.date.recent(faker.random.number({ min: 30, max: 120 }));
 
+const randomWord = () => faker.random.word().split(' ')[0];
+
 const randomDatePassed = () => faker.date.past(1);
 
-const generateOptionallRunFields = (url) => {
+const generateOptionalRunFields = ({ url, statusEvents }) => {
   const fields = {};
   if (faker.random.boolean()) {
-    fields.created = randomDatePassed();
-    fields.completed = randomDate();
     fields.host_tag = randomHostTag();
     fields.tests = `${url}/tests/`;
+  }
+  if (statusEvents) {
+    fields.created = randomDatePassed();
+    fields.completed = randomDate();
   }
   return fields;
 };
 
-const generateRuns = (url) => {
+const generateRuns = ({ url, statusEvents }) => {
   const limit = faker.random.number({ min: 2, max: 6 });
   const arr = new Array(limit);
   for (let idx = 0; idx < limit; idx++) {
-    const name = faker.random.word();
+    const name = randomWord();
     const runUrl = `${url}/runs/${name}`;
     arr[idx] = {
       name,
       url: runUrl,
       status: randomRunStatus(),
       log_url: `${runUrl}/console.log`,
-      ...generateOptionallRunFields(runUrl),
+      ...generateOptionalRunFields({ url: runUrl, statusEvents }),
     };
   }
   return arr;
@@ -86,7 +90,7 @@ const generateOptionalBuildFields = (statusEvents) => {
   if (faker.random.boolean()) {
     fields.trigger_name = 'merge-request';
     fields.completed = randomDate();
-    fields.name = faker.random.word();
+    fields.name = randomWord();
   }
   return fields;
 };
@@ -127,7 +131,7 @@ const generateBuildItem = ({ isDetailed, url, bid }) => {
     build_id: bid,
     url: itemUrl,
     status,
-    runs: generateRuns(itemUrl),
+    runs: generateRuns({ url: itemUrl, statusEvents }),
     ...generateOptionalBuildFields(statusEvents),
     ...detailedFields,
   };
@@ -143,6 +147,32 @@ const generateBuildList = (url) => {
   }
   return arr;
 };
+const generateDetailRunFields = ({ url, statusEvents }) => ({
+  artifacts: generateRunArtifacts(url),
+  status_events: statusEvents,
+  worker_name: randomWord(),
+});
+
+const generateRunItem = ({ name, url, isDetailed }) => {
+  const itemUrl = `${url}/name`;
+  const statusEvents = generateStatusEvents();
+  const detailFields = isDetailed
+    ? generateDetailRunFields({ url: itemUrl, statusEvents })
+    : {};
+  return {
+    name,
+    status: randomRunStatus(),
+    url: itemUrl,
+    log_url: `${itemUrl}/console.log`,
+    ...generateOptionalRunFields({ url: itemUrl, statusEvents }),
+    ...detailFields,
+  };
+};
+
+const generateRunArtifacts = (url) =>
+  Array(faker.random.number({ min: 0, max: 15 }))
+    .fill(null)
+    .map(() => `${url}/${randomWord()}`);
 
 const router = express.Router();
 router.get('/:project/builds/', (req, res) => {
@@ -242,6 +272,16 @@ router.get('/:project/builds/latest', (req, res) => {
     },
   });
   return;
+});
+router.get('/:project/builds/:build/runs/:run/', (req, res) => {
+  const { project, build, run } = req.params;
+  const url = `${ROOT_URL}/${project}/builds/${build}/runs`;
+  res.json({
+    status: 'success',
+    data: {
+      run: generateRunItem({ name: run, url, isDetailed: true }),
+    },
+  });
 });
 
 export default router;
