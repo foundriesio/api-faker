@@ -48,7 +48,7 @@ const randomHostTag = () => faker.random.arrayElement(HOST_CHOICES);
 const randomDate = () =>
   faker.date.recent(faker.random.number({ min: 30, max: 120 }));
 
-const randomWord = () => faker.random.word().split(' ')[0];
+const randomWord = () => faker.random.word().split(' ')[0].toLowerCase();
 
 const randomDatePassed = () => faker.date.past(1);
 
@@ -147,13 +147,24 @@ const generateBuildList = (url) => {
   }
   return arr;
 };
+
 const generateDetailRunFields = ({ url, statusEvents }) => ({
   artifacts: generateRunArtifacts(url),
   status_events: statusEvents,
   worker_name: randomWord(),
 });
 
-const generateRunItem = ({ name, url, isDetailed }) => {
+const generateRunList = (url) => {
+  const limit = faker.random.number({ min: 0, max: 60 });
+  const arr = new Array(limit);
+  for (let idx = 0; idx < limit; idx++) {
+    const name = randomWord();
+    arr[idx] = generateRunItem({ url, name });
+  }
+  return arr;
+};
+
+const generateRunItem = ({ name, url, isDetailed = false }) => {
   const itemUrl = `${url}/name`;
   const statusEvents = generateStatusEvents();
   const detailFields = isDetailed
@@ -272,6 +283,14 @@ router.get('/:project/builds/latest', (req, res) => {
     },
   });
   return;
+});
+router.get('/:project/builds/:build/runs/', (req, res) => {
+  const { project, build } = req.params;
+  const url = `${ROOT_URL}/${project}/builds/${build}/runs`;
+  res.json({
+    status: 'success',
+    data: generateRunList(url),
+  });
 });
 router.get('/:project/builds/:build/runs/:run/', (req, res) => {
   const { project, build, run } = req.params;
