@@ -152,7 +152,54 @@ router.get('/:project/builds/:build/project.yml', (req, res) => {
   const project = req.params.project;
   res
     .type('text/yaml')
-    .send(`some: "yaml for project ${project} build ${bid}"`);
+    .send(`\
+scripts:
+  flake8: '#!/bin/sh -ex
+
+    pip3 install flake8
+
+    flake8 --ignore=E722 --exclude=migrations/ ./
+
+    '
+  unit-test: '#!/bin/sh -ex
+
+    apk --no-cache add git python3-dev musl-dev gcc openssl libffi-dev openssl-dev
+
+    git config --global user.email "cibot@example.com"
+
+    git config --global user.name "cibot"
+
+    ./unit-test.sh
+
+    '
+timeout: 5
+triggers:
+- name: merge-request
+  runs:
+  - container: python:3.5-alpine
+    host-tag: amd64
+    name: unit-test
+    script: unit-test
+    test-grepping:
+      fixupdict:
+        ERROR: FAILED
+        ok: PASSED
+      result-pattern: ^(?P<name>test_.*) \.\.\. (?P<result>(ok|ERROR))$
+  - container: python:3.5-alpine
+    host-tag: amd64
+    name: flake8
+    script: flake8
+  type: github_pr
+- name: post-merge
+  params:
+    GIT_POLL_REFS: refs/heads/master
+    GIT_URL: https://github.com/linaro-technologies/jobserv.git
+  runs:
+  - container: python:3.5-alpine
+    host-tag: amd64
+    name: flake8
+    script: flake8
+  type: git_poller`);
   return;
 });
 router.get('/:project/builds/latest', (req, res) => {
