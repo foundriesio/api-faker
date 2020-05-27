@@ -16,6 +16,7 @@ import { OGError } from './lib/errors';
 import appState from './lib/state';
 import config from './config';
 
+import BuildsRoutes from './routes/builds';
 import DevicesRoutes from './routes/devices';
 import FactoriesRoutes from './routes/factories';
 import HealthRoutes from './routes/health';
@@ -44,6 +45,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/builds', BuildsRoutes);
 app.use('/healthz', HealthRoutes);
 app.use('/factories', FactoriesRoutes);
 app.use('/devices', DevicesRoutes);
