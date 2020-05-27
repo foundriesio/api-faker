@@ -22,6 +22,23 @@ const BUILD_STATUS_CHOICES = [
 ];
 const RUN_STATUS_CHOICES = [...BUILD_STATUS_CHOICES, 'CANCELLING'];
 const HOST_CHOICES = ['arm32', 'arm64', 'amd64'];
+const randomAnnotation = () => {
+  const name = faker.random.word();
+  const sha = Array(64)
+    .fill(null)
+    .map(() => Math.floor(Math.random() * 17).toString(16))
+    .join('');
+  const url = faker.internet.url();
+  const content = () =>
+    faker.lorem.lines(faker.random.number({ min: 0, max: 5 }));
+  return faker.random.arrayElement([
+    `{"name": "${name}", "sha": "${sha}", "url": "${url}", "details": "## Highlights\\n ${content()}\\n"}`,
+    `###Random Markdown\\n${content()}\\n${content()}`,
+    faker.random.alphaNumeric(faker.random.number({ min: 50, max: 500 })),
+    null,
+  ]);
+};
+
 const randomBuildStatus = () => faker.random.arrayElement(BUILD_STATUS_CHOICES);
 const randomRunStatus = () => faker.random.arrayElement(RUN_STATUS_CHOICES);
 const randomHostTag = () => faker.random.arrayElement(HOST_CHOICES);
@@ -76,24 +93,28 @@ const generateStatusEvents = () => {
   }
   return arr;
 };
-const generateDetailBuildFields = ({ bid, url, statusEvents }) => {
+const generateAnnotation = (status) => {
+  return status === 'PROMOTED' ? randomAnnotation() : null;
+};
+const generateDetailBuildFields = ({ bid, url, statusEvents, status }) => {
   return {
     status_events: statusEvents,
     runs_url: `${url}/${bid}/runs`,
     reason: `GitHub PR(${faker.random.number()}): pull_request`,
-    annotation: null,
+    annotation: generateAnnotation(status),
   };
 };
 
 const generateBuildItem = ({ isDetailed, url, bid }) => {
+  const status = randomBuildStatus();
   const statusEvents = generateStatusEvents();
   const detailedFields = isDetailed
-    ? generateDetailBuildFields({ bid, url, statusEvents })
+    ? generateDetailBuildFields({ bid, url, statusEvents, status })
     : {};
   return {
     build_id: bid,
     url: `${url}/${bid}`,
-    status: randomBuildStatus(),
+    status,
     runs: generateRuns(bid, url),
     ...generateOptionalBuildFields(statusEvents),
     ...detailedFields,
