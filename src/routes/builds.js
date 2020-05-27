@@ -285,7 +285,7 @@ router.get('/latest', (req, res) => {
                         status: 'CANCELLING',
                     },
                 ],
-                runs_url: `http://fakerunsurl/7`,
+                runs_url: 'http://fakerunsurl/7',
                 reason: 'GitHub PR(77): pull_request',
                 annotation: null,
             }
