@@ -27,10 +27,11 @@ const randomRunStatus = () => faker.random.arrayElement(RUN_STATUS_CHOICES);
 const randomHostTag = () => faker.random.arrayElement(HOST_CHOICES);
 const randomDate = () =>
   faker.date.recent(faker.random.number({ min: 30, max: 120 }));
+const randomDatePassed = () => faker.date.past(1);
 const generateOptionallRunFields = (buildId, runName) => {
   const fields = {};
   if (faker.random.boolean()) {
-    fields.created = randomDate();
+    fields.created = randomDatePassed();
     fields.completed = randomDate();
     fields.host_tag = randomHostTag();
     fields.tests = `https://example.net/${buildId}/${runName}`;
@@ -55,7 +56,7 @@ const generateRuns = (bid, url) => {
 const generateOptionalBuildFields = (statusEvents) => {
   const fields = {};
   if (statusEvents) {
-    fields.created = randomDate();
+    fields.created = randomDatePassed();
   }
   if (faker.random.boolean()) {
     fields.trigger_name = 'merge-request';
@@ -75,7 +76,7 @@ const generateStatusEvents = () => {
   }
   return arr;
 };
-const generateDetailBuildFields = ({bid, url, statusEvents}) => {
+const generateDetailBuildFields = ({ bid, url, statusEvents }) => {
   return {
     status_events: statusEvents,
     runs_url: `${url}/${bid}/runs`,
@@ -86,7 +87,9 @@ const generateDetailBuildFields = ({bid, url, statusEvents}) => {
 
 const generateBuildItem = ({ isDetailed, url, bid }) => {
   const statusEvents = generateStatusEvents();
-  const detailedFields = isDetailed ? generateDetailBuildFields({bid, url, statusEvents}) : {};
+  const detailedFields = isDetailed
+    ? generateDetailBuildFields({ bid, url, statusEvents })
+    : {};
   return {
     build_id: bid,
     url: `${url}/${bid}`,
