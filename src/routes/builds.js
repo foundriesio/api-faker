@@ -247,7 +247,8 @@ router.get('/builds/:build/', (req, res) => {
     });
     return;
 });
-router.get('/builds/:buildId/project.yml', (req, res) => {
+router.get('/builds/:build/project.yml', (req, res) => {
+    res.status(200).type('text/yaml').send('some: yaml');
     return;
 });
 router.get('/builds/latest/', (req, res) => {
