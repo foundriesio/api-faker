@@ -21,6 +21,7 @@ const BUILD_STATUS_CHOICES = [
 const RUN_STATUS_CHOICES = [...BUILD_STATUS_CHOICES, 'CANCELLING'];
 const HOST_CHOICES = ['arm32', 'arm64', 'amd64'];
 const ROOT_URL = 'https://example.net/projects';
+const PROJECT_ROUTE = ':project([0-9A-z_-]{1,}/lmp|[0-9A-z_-]{1,})';
 
 const randomAnnotation = () => {
   const name = randomWord();
@@ -224,7 +225,7 @@ const generateTestList = (url) => {
 
 const router = express.Router();
 
-router.get('/:project/builds/', (req, res) => {
+router.get(`/${PROJECT_ROUTE}/builds/`, (req, res) => {
   const project = req.params.project;
   const url = `${ROOT_URL}/${project}/builds`;
   const builds = generateBuildList(url);
@@ -239,14 +240,14 @@ router.get('/:project/builds/', (req, res) => {
   return;
 });
 
-router.get('/:project/builds/:build/', (req, res) => {
-  const project = req.params.project;
-  const url = `${ROOT_URL}/${project}`;
+router.get(`/${PROJECT_ROUTE}/builds/:build/`, (req, res) => {
+  const { project, build } = req.params;
+  const url = `${ROOT_URL}/${project}/builds`;
   res.json({
     status: 'success',
     data: {
       build: generateBuildItem({
-        bid: req.params.build,
+        bid: build,
         isDetailed: true,
         url,
       }),
@@ -255,9 +256,7 @@ router.get('/:project/builds/:build/', (req, res) => {
   return;
 });
 
-router.get('/:project/builds/:build/project.yml', (req, res) => {
-  const bid = req.params.build;
-  const project = req.params.project;
+router.get(`/${PROJECT_ROUTE}/builds/:build/project.yml`, (req, res) => {
   res.type('text/yaml').send(`\
 scripts:
   flake8: '#!/bin/sh -ex
@@ -309,7 +308,7 @@ triggers:
   return;
 });
 
-router.get('/:project/builds/latest', (req, res) => {
+router.get(`/${PROJECT_ROUTE}/builds/latest`, (req, res) => {
   const project = req.params.project;
   const url = `${ROOT_URL}/${project}`;
   const bid = faker.random.number();
@@ -326,7 +325,7 @@ router.get('/:project/builds/latest', (req, res) => {
   return;
 });
 
-router.get('/:project/builds/:build/runs/', (req, res) => {
+router.get(`/${PROJECT_ROUTE}/builds/:build/runs/`, (req, res) => {
   const { project, build } = req.params;
   const url = `${ROOT_URL}/${project}/builds/${build}/runs`;
   res.json({
@@ -337,7 +336,7 @@ router.get('/:project/builds/:build/runs/', (req, res) => {
   });
 });
 
-router.get('/:project/builds/:build/runs/:run/', (req, res) => {
+router.get(`/${PROJECT_ROUTE}/builds/:build/runs/:run/`, (req, res) => {
   const { project, build, run } = req.params;
   const url = `${ROOT_URL}/${project}/builds/${build}/runs`;
   res.json({
@@ -348,18 +347,21 @@ router.get('/:project/builds/:build/runs/:run/', (req, res) => {
   });
 });
 
-router.get('/:project/builds/:build/runs/:run/tests/:test', (req, res) => {
-  const { project, build, run, test } = req.params;
-  const url = `${ROOT_URL}/${project}/builds/${build}/runs/${run}/tests`;
-  res.json({
-    status: 'success',
-    data: {
-      test: generateTestItem({ name: test, url, isDetailed: true }),
-    },
-  });
-});
+router.get(
+  `/${PROJECT_ROUTE}/builds/:build/runs/:run/tests/:test`,
+  (req, res) => {
+    const { project, build, run, test } = req.params;
+    const url = `${ROOT_URL}/${project}/builds/${build}/runs/${run}/tests`;
+    res.json({
+      status: 'success',
+      data: {
+        test: generateTestItem({ name: test, url, isDetailed: true }),
+      },
+    });
+  }
+);
 
-router.get('/:project/builds/:build/runs/:run/tests', (req, res) => {
+router.get(`/${PROJECT_ROUTE}/builds/:build/runs/:run/tests`, (req, res) => {
   const { project, build, run } = req.params;
   const url = `${ROOT_URL}/${project}/builds/${build}/runs/${run}/tests`;
   res.json({
@@ -370,11 +372,14 @@ router.get('/:project/builds/:build/runs/:run/tests', (req, res) => {
   });
 });
 
-router.get('/:project/builds/:build/runs/:run/:artifact', (req, res) => {
-  const content = faker.lorem.sentences(
-    faker.random.number({ min: 1, max: 30 })
-  );
-  res.type('text/plain').send(content);
-});
+router.get(
+  `/${PROJECT_ROUTE}/builds/:build/runs/:run/:artifact`,
+  (req, res) => {
+    const content = faker.lorem.sentences(
+      faker.random.number({ min: 1, max: 30 })
+    );
+    res.type('text/plain').send(content);
+  }
+);
 
 export default router;
