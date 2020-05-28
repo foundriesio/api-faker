@@ -341,6 +341,12 @@ router.get('/:project/builds/:build/runs/:run/', (req, res) => {
     },
   });
 });
+router.get('/:project/builds/:build/runs/:run/:artifact', (req, res) => {
+  const content = faker.lorem.sentences(
+    faker.random.number({ min: 1, max: 30 })
+  );
+  res.type('text/plain').send(content);
+});
 router.get('/:project/builds/:build/runs/:run/tests/:test', (req, res) => {
   const { project, build, run, test } = req.params;
   const url = `${ROOT_URL}/${project}/builds/${build}/runs/${run}/tests`;
