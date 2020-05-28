@@ -41,6 +41,9 @@ const randomAnnotation = () => {
 
 const randomBuildStatus = () => faker.random.arrayElement(BUILD_STATUS_CHOICES);
 
+const randomWordNullable = () =>
+  faker.random.arrayElement([null, randomWord()]);
+
 const randomRunStatus = () => faker.random.arrayElement(RUN_STATUS_CHOICES);
 
 const randomHostTag = () => faker.random.arrayElement(HOST_CHOICES);
@@ -165,7 +168,7 @@ const generateRunList = (url) => {
 };
 
 const generateRunItem = ({ name, url, isDetailed = false }) => {
-  const itemUrl = `${url}/name`;
+  const itemUrl = `${url}/${name}`;
   const statusEvents = generateStatusEvents();
   const detailFields = isDetailed
     ? generateDetailRunFields({ url: itemUrl, statusEvents })
@@ -184,6 +187,31 @@ const generateRunArtifacts = (url) =>
   Array(faker.random.number({ min: 0, max: 15 }))
     .fill(null)
     .map(() => `${url}/${randomWord()}`);
+
+const generateDetailTestFields = () => {
+  const results = Array(faker.random.number({ min: 0, max: 10 }))
+    .fill(null)
+    .map(() => ({
+      name: randomWord(),
+      context: randomWordNullable(),
+      status: randomRunStatus(),
+      output: randomWordNullable(),
+    }));
+  return { results };
+};
+
+const generateTestItem = ({ name, url, isDetailed = false }) => {
+  const itemUrl = `${url}/${name}`;
+  const detailFields = isDetailed ? generateDetailTestFields() : {};
+  return {
+    name,
+    url: itemUrl,
+    status: randomRunStatus(),
+    context: randomWordNullable(),
+    created: randomDate(),
+    ...detailFields,
+  };
+};
 
 const router = express.Router();
 router.get('/:project/builds/', (req, res) => {
@@ -299,6 +327,16 @@ router.get('/:project/builds/:build/runs/:run/', (req, res) => {
     status: 'success',
     data: {
       run: generateRunItem({ name: run, url, isDetailed: true }),
+    },
+  });
+});
+router.get('/:project/builds/:build/runs/:run/tests/:test', (req, res) => {
+  const { project, build, run, test } = req.params;
+  const url = `${ROOT_URL}/${project}/builds/${build}/runs/${run}/tests`;
+  res.json({
+    status: 'success',
+    data: {
+      test: generateTestItem({ name: test, url, isDetailed: true }),
     },
   });
 });
