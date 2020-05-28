@@ -143,10 +143,9 @@ const generateBuildItem = ({ isDetailed, url, bid }) => {
 const generateBuildList = (url) => {
   const limit = faker.random.number({ min: 0, max: 60 });
   const arr = new Array(limit);
-  const buildUrl = `${url}/builds/`;
   for (let idx = 0; idx < limit; idx++) {
     const bid = faker.random.number();
-    arr[idx] = generateBuildItem({ url: buildUrl, bid });
+    arr[idx] = generateBuildItem({ url, bid });
   }
   return arr;
 };
@@ -213,10 +212,20 @@ const generateTestItem = ({ name, url, isDetailed = false }) => {
   };
 };
 
+const generateTestList = (url) => {
+  const limit = faker.random.number({ min: 0, max: 60 });
+  const arr = new Array(limit);
+  for (let idx = 0; idx < limit; idx++) {
+    const name = randomWord();
+    arr[idx] = generateTestItem({ url, name });
+  }
+  return arr;
+};
+
 const router = express.Router();
 router.get('/:project/builds/', (req, res) => {
   const project = req.params.project;
-  const url = `${ROOT_URL}/${project}`;
+  const url = `${ROOT_URL}/${project}/builds`;
   const builds = generateBuildList(url);
   res.json({
     status: 'success',
@@ -317,7 +326,9 @@ router.get('/:project/builds/:build/runs/', (req, res) => {
   const url = `${ROOT_URL}/${project}/builds/${build}/runs`;
   res.json({
     status: 'success',
-    data: generateRunList(url),
+    data: {
+      runs: generateRunList(url),
+    },
   });
 });
 router.get('/:project/builds/:build/runs/:run/', (req, res) => {
@@ -337,6 +348,16 @@ router.get('/:project/builds/:build/runs/:run/tests/:test', (req, res) => {
     status: 'success',
     data: {
       test: generateTestItem({ name: test, url, isDetailed: true }),
+    },
+  });
+});
+router.get('/:project/builds/:build/runs/:run/tests', (req, res) => {
+  const { project, build, run } = req.params;
+  const url = `${ROOT_URL}/${project}/builds/${build}/runs/${run}/tests`;
+  res.json({
+    status: 'success',
+    data: {
+      tests: generateTestList(url),
     },
   });
 });
