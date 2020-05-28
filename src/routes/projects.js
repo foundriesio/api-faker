@@ -223,6 +223,7 @@ const generateTestList = (url) => {
 };
 
 const router = express.Router();
+
 router.get('/:project/builds/', (req, res) => {
   const project = req.params.project;
   const url = `${ROOT_URL}/${project}/builds`;
@@ -237,6 +238,7 @@ router.get('/:project/builds/', (req, res) => {
   });
   return;
 });
+
 router.get('/:project/builds/:build/', (req, res) => {
   const project = req.params.project;
   const url = `${ROOT_URL}/${project}`;
@@ -252,6 +254,7 @@ router.get('/:project/builds/:build/', (req, res) => {
   });
   return;
 });
+
 router.get('/:project/builds/:build/project.yml', (req, res) => {
   const bid = req.params.build;
   const project = req.params.project;
@@ -305,6 +308,7 @@ triggers:
   type: git_poller`);
   return;
 });
+
 router.get('/:project/builds/latest', (req, res) => {
   const project = req.params.project;
   const url = `${ROOT_URL}/${project}`;
@@ -321,6 +325,7 @@ router.get('/:project/builds/latest', (req, res) => {
   });
   return;
 });
+
 router.get('/:project/builds/:build/runs/', (req, res) => {
   const { project, build } = req.params;
   const url = `${ROOT_URL}/${project}/builds/${build}/runs`;
@@ -331,6 +336,7 @@ router.get('/:project/builds/:build/runs/', (req, res) => {
     },
   });
 });
+
 router.get('/:project/builds/:build/runs/:run/', (req, res) => {
   const { project, build, run } = req.params;
   const url = `${ROOT_URL}/${project}/builds/${build}/runs`;
@@ -341,6 +347,7 @@ router.get('/:project/builds/:build/runs/:run/', (req, res) => {
     },
   });
 });
+
 router.get('/:project/builds/:build/runs/:run/tests/:test', (req, res) => {
   const { project, build, run, test } = req.params;
   const url = `${ROOT_URL}/${project}/builds/${build}/runs/${run}/tests`;
@@ -351,6 +358,7 @@ router.get('/:project/builds/:build/runs/:run/tests/:test', (req, res) => {
     },
   });
 });
+
 router.get('/:project/builds/:build/runs/:run/tests', (req, res) => {
   const { project, build, run } = req.params;
   const url = `${ROOT_URL}/${project}/builds/${build}/runs/${run}/tests`;
@@ -361,6 +369,7 @@ router.get('/:project/builds/:build/runs/:run/tests', (req, res) => {
     },
   });
 });
+
 router.get('/:project/builds/:build/runs/:run/:artifact', (req, res) => {
   const content = faker.lorem.sentences(
     faker.random.number({ min: 1, max: 30 })
