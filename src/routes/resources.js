@@ -13,8 +13,10 @@ import { decodeJwtSignature } from '../middlewares/authorization';
 const parseJson = express.json();
 const router = express.Router();
 
-router.post('/', [ decodeJwtSignature, parseJson ], (req, res) => {
-  req.log.info(`Creating factory '${req.body['org-name']}' with platform '${req.body.platform}' for user '${req.body['polis-id']}'`);
+router.post('/', [decodeJwtSignature, parseJson], (req, res) => {
+  req.log.info(
+    `Creating factory '${req.body['org-name']}' with platform '${req.body.platform}' for user '${req.body['polis-id']}'`
+  );
   res.status(202).json({ factory_state: 'queued' });
 });
 
