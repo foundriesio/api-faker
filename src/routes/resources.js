@@ -8,6 +8,14 @@ You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2
 
 import express from 'express';
 
+import { decodeJwtSignature } from '../middlewares/authorization';
+
+const parseJson = express.json();
 const router = express.Router();
+
+router.post('/', [ decodeJwtSignature, parseJson ], (req, res) => {
+  req.log.info(`Creating factory '${req.body['org-name']}' with platform '${req.body.platform}' for user '${req.body['polis-id']}'`);
+  res.status(202).json({ factory_state: 'queued' });
+});
 
 export default router;

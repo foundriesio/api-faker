@@ -20,7 +20,7 @@ import ProjectsRoutes from './routes/projects';
 import DevicesRoutes from './routes/devices';
 import FactoriesRoutes from './routes/factories';
 import HealthRoutes from './routes/health';
-import ResourcesRoutes from './routes/devices';
+import ResourcesRoutes from './routes/resources';
 
 const cfg = config();
 
@@ -53,7 +53,7 @@ app.use('/loops', ResourcesRoutes);
 
 // eslint-disable-next-line no-unused-vars
 app.use('*', (req, res, _next) => {
-  req.log.error('Requested non existing page', req.originalUrl);
+  req.log.error(`Requested non existing page '${req.originalUrl}'`);
   res.status(404).json({
     error: 'not_found',
     error_description: 'The requested resource was not found',
