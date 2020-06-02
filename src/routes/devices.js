@@ -50,10 +50,16 @@ function generateName(words = 2) {
   return getWords(words);
 }
 
-function generateDeviceName() {
-  return `${faker.random.arrayElement(BASE_DEVICE_NAMES)}${getWords(
-    1
-  )}-${faker.random.number({ min: 0, max: 100 })}`;
+function generateDeviceName(deviceName) {
+  let base;
+
+  if (deviceName) {
+    base = `${deviceName}-${getWords(1)}`;
+  } else {
+    base = `${faker.random.arrayElement(BASE_DEVICE_NAMES)}${getWords(1)}`;
+  }
+
+  return `${base}-${faker.random.number({ min: 0, max: 100 })}`;
 }
 
 async function generateOstreeHash() {
@@ -81,7 +87,13 @@ function generateDockerApps() {
   return generateArrayOfWords(faker.random.number({ min: 1, max: 6 }), 1);
 }
 
-function generateDeviceTags() {
+function generateDeviceTags(deviceTag) {
+  if (deviceTag) {
+    return [deviceTag].concat(
+      generateArrayOfWords(faker.random.number({ min: 2, max: 6 }), 1)
+    );
+  }
+
   return generateArrayOfWords(faker.random.number({ min: 1, max: 6 }), 1);
 }
 
@@ -95,7 +107,13 @@ async function generateUserId() {
   );
 }
 
-async function generateDeviceList(limit, factory, user) {
+async function generateDeviceList({
+  limit,
+  factory,
+  user,
+  deviceName,
+  deviceTag,
+}) {
   const arr = new Array(limit);
   for (let idx = 0; idx < limit; idx++) {
     // eslint-disable-next-line security/detect-object-injection
@@ -103,14 +121,14 @@ async function generateDeviceList(limit, factory, user) {
       uuid: faker.random.uuid(),
       owner: user || (await generateUserId()),
       factory: factory,
-      name: generateDeviceName(),
+      name: generateDeviceName(deviceName),
       'created-at': faker.date.recent(
         faker.random.number({ min: 30, max: 120 })
       ),
       'last-seen': faker.date.recent(),
       'ostree-hash': await generateOstreeHash(),
       'target-name': generateTargetName(),
-      'device-tags': generateDeviceTags(),
+      'device-tags': generateDeviceTags(deviceTag),
       'docker-apps': generateDockerApps(),
       'network-info': {
         hostname: generateDomainName(),
@@ -125,20 +143,38 @@ async function generateDeviceList(limit, factory, user) {
 }
 
 router.get('/', [decodeJwtSignature], async (req, res) => {
+  let deviceName;
+  let deviceTag;
   let factory;
   let limit;
   let page;
 
+  deviceName =
+    req.query.name_ilike && req.query.name_ilike.trim().replace(/%/g, '');
+  deviceTag = req.query.match_tag && req.query.match_tag.trim();
   factory = (req.query.factory && req.query.factory.trim()) || generateName();
-  page = (req.query.page && parseInt(req.query.page.trim(), 10)) || 1;
   limit = (req.query.limit && parseInt(req.query.limit.trim(), 10)) || LIMIT;
+  page = (req.query.page && parseInt(req.query.page.trim(), 10)) || 1;
+
+  req.log.debug(deviceName);
+
+  const params = {
+    limit: limit,
+    factory: factory,
+    user: res.locals.user,
+    deviceName: deviceName,
+    deviceTag: deviceTag,
+  };
 
   res.json({
-    devices: await generateDeviceList(limit, factory, res.locals.user),
+    devices: await generateDeviceList(params),
     page: page || 1,
     limit: limit,
     pages: Math.ceil(MAX_DEVICES / limit),
-    total: MAX_DEVICES,
+    total:
+      deviceName || deviceTag
+        ? faker.random.number({ min: 1, max: 30 })
+        : MAX_DEVICES,
   });
 });
 
