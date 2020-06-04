@@ -11,6 +11,7 @@ import express from 'express';
 import faker from 'faker';
 
 import { decodeJwtSignature } from '../middlewares/authorization';
+import { OGError } from '../lib/errors';
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 32);
 
@@ -156,8 +157,6 @@ router.get('/', [decodeJwtSignature], async (req, res) => {
   limit = (req.query.limit && parseInt(req.query.limit.trim(), 10)) || LIMIT;
   page = (req.query.page && parseInt(req.query.page.trim(), 10)) || 1;
 
-  req.log.debug(deviceName);
-
   const params = {
     limit: limit,
     factory: factory,
@@ -176,6 +175,33 @@ router.get('/', [decodeJwtSignature], async (req, res) => {
         ? faker.random.number({ min: 1, max: 30 })
         : MAX_DEVICES,
   });
+});
+
+router.delete('/:device', [decodeJwtSignature], async (req, res, next) => {
+  req.log.info(`Removing device named '${req.params.device}'`);
+
+  const status = faker.random.arrayElement([200, 204, 400, 404, 500, 204]);
+
+  if (status !== 200 || status !== 204) {
+    const err = new OGError(`Error removing device '${req.params.device}'`);
+    err.status = status;
+
+    if (status === 400) {
+      err.error = 'bad_request';
+      err.error_description = 'The request made was not valid.';
+    } else if (status === 404) {
+      err.error = 'not_found';
+      err.error_description = `Device '${req.params.device}' does not exist.`;
+    } else {
+      err.error = 'server_error';
+      err.error_description = `There was a problem removing the device '${req.params.device}'.`;
+    }
+
+    setImmediate(next.bind(next), err);
+    return;
+  }
+
+  res.status(status).json({ removed: 'ok' });
 });
 
 export default router;
