@@ -22,6 +22,8 @@ const RUN_STATUS_CHOICES = [...BUILD_STATUS_CHOICES, 'CANCELLING'];
 const HOST_CHOICES = ['arm32', 'arm64', 'amd64'];
 const ROOT_URL = 'https://example.net/projects';
 const PROJECT_ROUTE = ':project([0-9A-z_-]{1,}/lmp|[0-9A-z_-]{1,})';
+const MAX_BUILDS = 60;
+const DEFAULT_LIMIT = 25;
 
 const randomAnnotation = () => {
   const name = randomWord();
@@ -141,8 +143,7 @@ const generateBuildItem = ({ isDetailed, url, bid }) => {
   };
 };
 
-const generateBuildList = (url) => {
-  const limit = faker.random.number({ min: 0, max: 60 });
+const generateBuildList = ({ limit, url }) => {
   const arr = new Array(limit);
   for (let idx = 0; idx < limit; idx++) {
     const bid = faker.random.number();
@@ -228,12 +229,17 @@ const router = express.Router();
 router.get(`/${PROJECT_ROUTE}/builds/`, (req, res) => {
   const project = req.params.project;
   const url = `${ROOT_URL}/${project}/builds`;
-  const builds = generateBuildList(url);
+  const page = (req.query.page && parseInt(req.query.page.trim(), 10)) || 1;
+  const limit = (req.query.limit && parseInt(req.query.limit.trim(), 10)) || DEFAULT_LIMIT;
+
   res.json({
     status: 'success',
     data: {
-      builds: builds,
-      total: 500,
+      builds: generateBuildList({ limit, url }),
+      page: page || 1,
+      limit: limit, 
+      pages: Math.ceil(MAX_BUILDS / limit),
+      total: MAX_BUILDS,
       next: `${url}/builds/?page=1&limit=10`,
     },
   });
