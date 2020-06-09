@@ -230,14 +230,15 @@ router.get(`/${PROJECT_ROUTE}/builds/`, (req, res) => {
   const project = req.params.project;
   const url = `${ROOT_URL}/${project}/builds`;
   const page = (req.query.page && parseInt(req.query.page.trim(), 10)) || 1;
-  const limit = (req.query.limit && parseInt(req.query.limit.trim(), 10)) || DEFAULT_LIMIT;
+  const limit =
+    (req.query.limit && parseInt(req.query.limit.trim(), 10)) || DEFAULT_LIMIT;
 
   res.json({
     status: 'success',
     data: {
       builds: generateBuildList({ limit, url }),
       page: page || 1,
-      limit: limit, 
+      limit: limit,
       pages: Math.ceil(MAX_BUILDS / limit),
       total: MAX_BUILDS,
       next: `${url}/builds/?page=1&limit=10`,
