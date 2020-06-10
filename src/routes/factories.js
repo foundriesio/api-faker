@@ -17,14 +17,14 @@ const router = express.Router();
  * @param {Number} latestVersion
  * @returns {Array}
  */
-function generateTargets(latestVersion) {
+function generateTargets(latestVersion, totalDevices) {
   const totalTargets = faker.random.number({ min: 1, max: 10 });
   const targets = new Array(totalTargets);
 
   for (let i = 0; i < totalTargets; i++) {
     // eslint-disable-next-line security/detect-object-injection
     targets[i] = {
-      devices: faker.random.number({ min: 1, max: 10 }),
+      devices: faker.random.number({ min: 0, max: totalDevices }),
       version: faker.random.number({ min: 1, max: latestVersion }),
     };
   }
@@ -40,7 +40,7 @@ function generateTagName() {
     '',
     'promoted',
     'postmerge',
-    faker.random.word().toLowerCase(),
+    faker.random.words(1).split(' ')[0].toLowerCase(),
   ]);
 }
 
@@ -48,18 +48,23 @@ function generateTagName() {
  * @returns {Array}
  */
 function generateTags() {
-  const totalTags = faker.random.number({ min: 1, max: 10 });
+  const totalTags = faker.random.number({ min: 1, max: 7 });
   const tags = new Array(totalTags);
 
   for (let i = 0; i < totalTags; i++) {
+    const devicesTotal = faker.random.number({ min: 1, max: 10 });
+    const devicesOnline = faker.random.number({ min: 0, max: devicesTotal });
+    const devicesOnLatest = faker.random.number({ min: 0, max: devicesTotal });
+    const latestVersion = faker.random.number();
+
     // eslint-disable-next-line security/detect-object-injection
     tags[i] = {
       name: generateTagName(),
-      'devices-total': faker.random.number({ min: 1, max: 20 }),
-      'devices-online': faker.random.number({ min: 1, max: 20 }),
-      'devices-on-latest': faker.random.number({ min: 1, max: 10 }),
-      'latest-target': faker.random.number(),
-      targets: generateTargets(),
+      'devices-total': devicesTotal,
+      'devices-online': devicesOnline,
+      'devices-on-latest': devicesOnLatest,
+      'latest-target': latestVersion,
+      targets: generateTargets(latestVersion, devicesTotal),
     };
   }
 
