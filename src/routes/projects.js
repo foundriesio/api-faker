@@ -71,22 +71,24 @@ const generateOptionalRunFields = ({ url, statusEvents }) => {
   return fields;
 };
 
-const generateRuns = ({ url, statusEvents }) => {
-  const limit = faker.random.number({ min: 2, max: 6 });
-  const arr = new Array(limit);
-  for (let idx = 0; idx < limit; idx++) {
-    const name = randomWord();
-    const runUrl = `${url}/runs/${name}`;
-    arr[idx] = {
-      name,
-      url: runUrl,
-      status: randomRunStatus(),
-      log_url: `${runUrl}/console.log`,
-      ...generateOptionalRunFields({ url: runUrl, statusEvents }),
-    };
-  }
-  return arr;
-};
+const generateRun = ({ url, statusEvents, isDetailed = false }) => {
+  const name = randomWord();
+  const runUrl = `${url}/${name}`;
+  const detailedFields = isDetailed ? generateDetailRunFields({ statusEvents, url: runUrl }) : {};
+  return {
+    name,
+    url: runUrl,
+    status: randomRunStatus(),
+    log_url: `${runUrl}/console.log`,
+    ...generateOptionalRunFields({ url: runUrl, statusEvents }),
+    ...detailedFields,
+  };
+}
+
+const generateRuns = opts =>
+  Array(faker.random.number({ min: 2, max: 6 }))
+    .fill(null)
+    .map(() => generateRun(opts));
 
 const generateOptionalBuildFields = (statusEvents) => {
   const fields = {};
@@ -188,6 +190,25 @@ const generateRunArtifacts = (url) =>
   Array(faker.random.number({ min: 0, max: 15 }))
     .fill(null)
     .map(() => `${url}/${randomWord()}`);
+
+const generateRunHistoryList = ({ run: name, project}) => 
+  Array(faker.random.number({ min: 0, max: 20 }))
+    .fill(null)
+    .map(() => {
+      const randBuild = faker.random.number({ min: 100, max: 999 });
+      const url = `${ROOT_URL}/${project}/builds/${randBuild}/runs`;
+      const statusEvents = generateStatusEvents();
+      const {
+        artifacts: _,
+        ...runFields
+      } = generateRun({ url, statusEvents, isDetailed: true });
+      return {
+        ...runFields,
+        name,
+        build: randBuild,
+        duration_seconds: ((new Date(runFields.completed)) - (new Date(runFields.created))) / 1000,
+      };
+    });
 
 const generateDetailTestFields = () => {
   const results = Array(faker.random.number({ min: 0, max: 10 }))
@@ -386,6 +407,28 @@ router.get(
       faker.random.number({ min: 1, max: 30 })
     );
     res.type('text/plain').send(content);
+  }
+);
+
+router.get(
+  `/${PROJECT_ROUTE}/history/:run`, (req, res) => {
+    const run = req.params.run;
+    const project = req.params.project;
+    const url = `${ROOT_URL}/${project}/history/${run}`;
+    const page = (req.query.page && parseInt(req.query.page.trim(), 10)) || 1;
+    const limit =
+      (req.query.limit && parseInt(req.query.limit.trim(), 10)) || DEFAULT_LIMIT;
+    res.json({
+      status: 'success',
+      data: {
+        runs: generateRunHistoryList({ run, project }),
+        page: page || 1,
+        limit: limit,
+        pages: Math.ceil(MAX_BUILDS / limit),
+        total: MAX_BUILDS,
+        next: `${url}/?page=${page + 1}&limit=${limit}`,
+      },
+    });
   }
 );
 
