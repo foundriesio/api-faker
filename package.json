@@ -39,5 +39,10 @@
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foundriesio/api-faker.git"
+  },
+  "bugs": "https://github.com/foundriesio/api-faker.git/issues"
 }
