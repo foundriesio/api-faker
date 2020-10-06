@@ -191,7 +191,7 @@ const generateRunArtifacts = (url) =>
     .fill(null)
     .map(() => `${url}/${randomWord()}`);
 
-const generateRunHistoryList = ({ run: name, project}) => 
+const generateRunHistoryList = ({ run: name, project}) =>
   Array(faker.random.number({ min: 0, max: 20 }))
     .fill(null)
     .map(() => {
@@ -250,7 +250,7 @@ const router = express.Router();
 router.get(`/${PROJECT_ROUTE}/builds/`, (req, res) => {
   const project = req.params.project;
   const url = `${ROOT_URL}/${project}/builds`;
-  const page = (req.query.page && parseInt(req.query.page.trim(), 10)) || 1;
+  const page = (req.query.page && parseInt(req.query.page.trim(), 10)) || 0;
   const limit =
     (req.query.limit && parseInt(req.query.limit.trim(), 10)) || DEFAULT_LIMIT;
 
@@ -258,7 +258,7 @@ router.get(`/${PROJECT_ROUTE}/builds/`, (req, res) => {
     status: 'success',
     data: {
       builds: generateBuildList({ limit, url }),
-      page: page || 1,
+      page: page || 0,
       limit: limit,
       pages: Math.ceil(MAX_BUILDS / limit),
       total: MAX_BUILDS,
