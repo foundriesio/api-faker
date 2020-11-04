@@ -83,7 +83,7 @@ const generateRun = ({ url, statusEvents, isDetailed = false }) => {
     ...generateOptionalRunFields({ url: runUrl, statusEvents }),
     ...detailedFields,
   };
-}
+};
 
 const generateRuns = opts =>
   Array(faker.random.number({ min: 2, max: 6 }))
@@ -107,6 +107,7 @@ const generateStatusEvents = () => {
   const limit = faker.random.number({ min: 0, max: 10 });
   const arr = new Array(limit);
   for (let idx = 0; idx < limit; idx++) {
+    // eslint-disable-next-line security/detect-object-injection
     arr[idx] = {
       time: randomDate(),
       status: randomRunStatus(),
