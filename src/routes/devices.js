@@ -178,11 +178,11 @@ router.get('/', [decodeJwtSignature], async (req, res) => {
 });
 
 router.delete('/:device', [decodeJwtSignature], async (req, res, next) => {
-  req.log.info(`Removing device named '${req.params.device}'`);
-
   const status = faker.random.arrayElement([200, 204, 400, 404, 500, 204]);
 
-  if (status !== 200 || status !== 204) {
+  req.log.info(`Removing device named '${req.params.device}' with status ${status}`);
+
+  if (status !== 200 && status !== 204) {
     const err = new OGError(`Error removing device '${req.params.device}'`);
     err.status = status;
 
