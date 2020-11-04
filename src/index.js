@@ -47,8 +47,8 @@ app.use((req, res, next) => {
 
 app.use('/projects', ProjectsRoutes);
 app.use('/healthz', HealthRoutes);
-app.use('/factories', FactoriesRoutes);
-app.use('/devices', DevicesRoutes);
+app.use('/ota/factories', FactoriesRoutes);
+app.use('/ota/devices', DevicesRoutes);
 app.use('/loops', ResourcesRoutes);
 
 // eslint-disable-next-line no-unused-vars
