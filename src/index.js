@@ -76,8 +76,8 @@ app.use((err, req, res, _next) => {
   }
 
   res.status(status).json({
-    error: 'server_error',
-    error_description: 'There was a problem processing the request',
+    error: err.error || 'server_error',
+    error_description: err.error_description || 'There was a problem processing the request',
   });
   return;
 });
