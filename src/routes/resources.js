@@ -20,4 +20,9 @@ router.post('/', [decodeJwtSignature, parseJson], (req, res) => {
   res.status(202).json({ factory_state: 'queued' });
 });
 
+router.delete('/:factory', [decodeJwtSignature], (req, res) => {
+  req.log.info(`Removing factory '${req.params.factory}' resources`);
+  res.status(202).send();
+});
+
 export default router;
