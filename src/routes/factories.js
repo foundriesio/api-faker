@@ -79,4 +79,9 @@ router.get('/:factory/status', (req, res) => {
   });
 });
 
+router.delete('/:factory', (req, res) => {
+  req.log.info(`Removing factory '${req.params.factory}'`);
+  res.status(202).json({});
+});
+
 export default router;
