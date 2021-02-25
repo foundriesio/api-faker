@@ -1,6 +1,9 @@
 {
   "name": "api-faker",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "main": "dist/main.js",
   "scripts": {
     "prebuild": "rimraf dist",
@@ -38,7 +41,7 @@
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
     "spawn-server-webpack-plugin": "^5.0.6",
-    "webpack": "^4.46.0",
+    "webpack": "^5.24.2",
     "webpack-cli": "^4.5.0",
     "webpack-dev-server": "^3.11.2"
   },
