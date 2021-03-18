@@ -8,7 +8,7 @@ You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2
 
 import express from 'express';
 
-import appState from '../lib/state';
+import appState from '../lib/state.js';
 
 const router = express.Router();
 

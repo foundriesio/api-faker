@@ -10,8 +10,8 @@ import { customAlphabet } from 'nanoid/async';
 import express from 'express';
 import faker from 'faker';
 
-import { decodeJwtSignature } from '../middlewares/authorization';
-import { OGError } from '../lib/errors';
+import { decodeJwtSignature } from '../middlewares/authorization.js';
+import { OGError } from '../lib/errors.js';
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 32);
 
