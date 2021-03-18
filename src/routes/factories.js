@@ -11,6 +11,7 @@ import faker from 'faker';
 
 const MAX_DEVICES = 60;
 
+const parseJson = express.json();
 const router = express.Router();
 
 /**
@@ -71,6 +72,26 @@ function generateTags() {
   return tags;
 }
 
+/**
+ * @returns {Array}
+ */
+function generateDeviceGroups() {
+  const totalGroups = faker.random.number({ min: 1, max: 7 });
+  const groups = new Array(totalGroups);
+
+  for (let i = 0; i < totalGroups; i++) {
+    // eslint-disable-next-line security/detect-object-injection
+    groups[i] = {
+      id: faker.random.number(),
+      name: faker.random.word().toLowerCase(),
+      description: faker.random.words().toLowerCase(),
+      'created-at': faker.date.past()
+    };
+  }
+
+  return groups;
+}
+
 router.get('/:factory/status', (req, res) => {
   req.log.info(`Retrieving status for factory '${req.params.factory}'`);
   res.json({
@@ -82,6 +103,33 @@ router.get('/:factory/status', (req, res) => {
 router.delete('/:factory', (req, res) => {
   req.log.info(`Removing factory '${req.params.factory}'`);
   res.status(202).json({});
+});
+
+router.post('/:factory/device-groups', [parseJson], (req, res) => {
+  req.log.info(`Creating new device groups for factory '${req.params.factory}'`);
+
+  const { body } = req;
+
+  res.json({
+    id: faker.random.number(),
+    name: body.name,
+    description: body.description,
+    'created-at': new Date()
+  });
+});
+
+router.delete('/:factory/device-groups/:group', (req, res) => {
+  const { params } = req;
+  req.log.info(`Deleting device group ${params.group} for factory '${params.factory}'`);
+
+  res.status(204).send();
+});
+
+router.get('/:factory/device-groups', (req, res) => {
+  req.log.info(`Retrieving device groups for factory '${req.params.factory}'`);
+  res.json({
+    groups: generateDeviceGroups()
+  });
 });
 
 export default router;
