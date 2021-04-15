@@ -1,7 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
 
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const SpawnServerPlugin = require('spawn-server-webpack-plugin');
 
 const { NODE_ENV } = process.env;
@@ -58,10 +57,6 @@ function compiler(config) {
     },
     plugins: [
       ...config.plugins,
-      isProd &&
-        new CleanWebpackPlugin({
-          cleanStaleWebpackAssets: true,
-        }),
     ].filter(Boolean),
   };
 }
