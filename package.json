@@ -15,7 +15,7 @@
   "author": "Milo Casagrande <milo@foundries.io>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@foundriesio/log": "^3.2.0",
+    "@foundriesio/log": "^3.2.3",
     "bluebird": "^3.7.2",
     "compress": "^0.99.0",
     "convict": "^6.1.0",
