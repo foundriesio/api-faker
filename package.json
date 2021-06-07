@@ -37,7 +37,7 @@
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-security": "^1.4.0",
     "pino-pretty": "^4.7.1",
-    "prettier": "^2.2.1",
+    "prettier": "^2.3.1",
     "rimraf": "^3.0.2",
     "spawn-server-webpack-plugin": "^5.0.6",
     "webpack": "^5.36.2",
