@@ -15,7 +15,7 @@
   "author": "Milo Casagrande <milo@foundries.io>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@foundriesio/log": "^3.2.3",
+    "@foundriesio/log": "^3.2.6",
     "bluebird": "^3.7.2",
     "compress": "^0.99.0",
     "convict": "^6.1.0",
@@ -31,17 +31,17 @@
     "v8-compile-cache": "^2.3.0"
   },
   "devDependencies": {
-    "dotenv": "^9.0.0",
-    "eslint": "^7.25.0",
+    "dotenv": "^10.0.0",
+    "eslint": "^7.30.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-security": "^1.4.0",
-    "pino-pretty": "^4.7.1",
-    "prettier": "^2.2.1",
+    "pino-pretty": "^5.1.0",
+    "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
     "spawn-server-webpack-plugin": "^5.0.6",
-    "webpack": "^5.36.2",
-    "webpack-cli": "^4.7.0",
+    "webpack": "^5.42.0",
+    "webpack-cli": "^4.7.2",
     "webpack-dev-server": "^3.11.2"
   },
   "repository": {
